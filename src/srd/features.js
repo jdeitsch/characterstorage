@@ -1,4 +1,4 @@
-import SpellCasting from "./spellcasting";
+import SpellCasting from "./spellCasting";
 
 const Features = {
       "1": {

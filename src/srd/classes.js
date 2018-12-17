@@ -2,7 +2,7 @@ import AbilityScores from "./ability_scores";
 import Proficiencies from "./proficiencies";
 import Races from "./races";
 import Skills from "./skills";
-import SpellCasting from "./spellcasting";
+import SpellCasting from "./spellCasting";
 import Subclasses from "./subclasses";
 import StartingEquipment from "./startingEquipment";
 import Levels from './levels';
