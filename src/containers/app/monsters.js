@@ -54,7 +54,6 @@ class MonstersComponent extends React.Component {
     super(props);
     this.state = {
       inputMap: [],
-      monsterMap: {},
       crs: [],
       selectedCRs: [],
       monsterTypes: [],
@@ -107,9 +106,9 @@ class MonstersComponent extends React.Component {
   };
 
   updateTypeList = (list) => {
-    let monsterTypes = Array.from(new Set(this.state.inputMap.map( monster => {
-      if (list.includes(monster.cr)) {
-        return monster.type
+    let monsterTypes = Array.from(new Set(Object.keys(Monsters).map( monster => {
+      if (list.includes(Monsters[monster].challenge_rating)) {
+        return Monsters[monster].type
       }
     }))).sort();
     if (monsterTypes.indexOf(undefined) > 0) {
@@ -124,9 +123,9 @@ class MonstersComponent extends React.Component {
   };
 
   updateCRList = (list) => {
-    let crs = Array.from(new Set(this.state.inputMap.map( monster => {
-      if (list.includes(monster.type)) {
-        return monster.cr
+    let crs = Array.from(new Set(Object.keys(Monsters).map( monster => {
+      if (list.includes(Monsters[monster].type)) {
+        return Monsters[monster].challenge_rating
       }
     }))).sort((a,b) => { return a-b});
     if (crs.indexOf(undefined) > 0) {
@@ -135,48 +134,15 @@ class MonstersComponent extends React.Component {
     this.setState({ crs: crs });
   }
 
-  updateMonsterMap = () => {
-    if (this.state.selectedCRs.length === 0 && this.state.selectedMonsterTypes.length === 0) { return Monsters }
-
-    else {
-      let monsterMap = {};
-      if(this.state.selectedMonsterTypes.length === 0) {
-        Object.keys(Monsters).map( (index) => {
-          if (this.state.selectedCRs.includes(Monsters[index])) {
-            monsterMap = Object.assign(Monsters[index], monsterMap)
-          }
-        })
-      }
-      if(this.state.selectedCRs.length === 0) {
-        Object.keys(Monsters).map( (index) => {
-          if (this.state.selectedMonsterTypes.includes(Monsters[index])) {
-            monsterMap = Object.assign(Monsters[index], monsterMap)
-          }
-        })
-      }
-      if(this.state.selectedMonsterTypes.length > 0 && this.state.selectedCRs.length > 0) {
-        Object.keys(Monsters).map( (index) => {
-          if (this.state.selectedMonsterTypes.includes(Monsters[index]) && this.state.selectedCRs.includes(Monsters[index])) {
-            monsterMap = Object.assign(Monsters[index], monsterMap)
-          }
-        })
-      }
-      return monsterMap;
-    }
-      /*(this.state.selectedCRs.length > 0 && this.state.selectedCRs.includes(Monsters[monster].challenge_rating)) &&
-      (this.state.selectedMonsterTypes.length === 0 || (this.state.selectedMonsterTypes.length > 0 && this.state.selectedMonsterTypes.includes(Monsters[monster].type)))*/
-    
-  }
-
   handleCRDelete = (e) => {
     let selectedCRs = JSON.parse(JSON.stringify(this.state.selectedCRs));
-    selectedCRs.splice( selectedCRs.indexOf(e.target.previousSibling.innerHTML), 1);
+    selectedCRs.splice( selectedCRs.indexOf(e.target.closest("div.chipWrapper").dataset.value), 1);
     this.setState({ selectedCRs: selectedCRs })
   }
 
   handleTypeDelete = (e) => {
     let selectedMonsterTypes = JSON.parse(JSON.stringify(this.state.selectedMonsterTypes).toLowerCase());
-    const thisOne = e.target.previousSibling.innerHTML.toLowerCase();
+    const thisOne = e.target.closest("div.chipWrapper").dataset.value.toLowerCase();
     selectedMonsterTypes.splice( selectedMonsterTypes.indexOf(thisOne), 1);
     this.setState({ selectedMonsterTypes: selectedMonsterTypes })
   }
@@ -201,12 +167,13 @@ class MonstersComponent extends React.Component {
                 renderValue={ selected => (
                   <div className={classes.chips}>
                     {selected.map(value => (
-                      <Chip 
-                        key={value} 
-                        label={this.handleFractions(value)} 
-                        className={classes.chip} 
-                        onDelete={this.handleCRDelete}
-                        />
+                      <div className="chipWrapper" data-value={value} key={value}>
+                        <Chip 
+                          label={this.handleFractions(value)} 
+                          className={classes.chip} 
+                          onDelete={this.handleCRDelete}
+                          />
+                      </div>
                     ))}
                   </div>
                 )}
@@ -231,12 +198,13 @@ class MonstersComponent extends React.Component {
                 renderValue={ selected => (
                   <div className={classes.chips}>
                     {selected.map(value => (
-                      <Chip 
-                        key={value} 
-                        label={this.titleCase(value)} 
-                        className={classes.chip} 
-                        onDelete={this.handleTypeDelete}
-                      />
+                      <div className="chipWrapper" data-value={value} key={value}>
+                        <Chip 
+                          label={this.titleCase(value)} 
+                          className={classes.chip} 
+                          onDelete={this.handleTypeDelete}
+                        />
+                      </div>
                     ))}
                   </div>
                 )}
@@ -251,7 +219,6 @@ class MonstersComponent extends React.Component {
               </Select>
             </FormControl>
           </Grid>
-          { false &&
           <Grid item>
             <FormControl className={classes.formControl}>
             <TextField
@@ -263,13 +230,13 @@ class MonstersComponent extends React.Component {
             />
             </FormControl>
           </Grid>
-          }
         </Grid>
         <Grid container spacing={16} justify="center">
             { Object.keys(Monsters).map( (monster, key) => {
               if (
                 (this.state.selectedCRs.length === 0 || (this.state.selectedCRs.length > 0 && this.state.selectedCRs.includes(Monsters[monster].challenge_rating))) &&
-                (this.state.selectedMonsterTypes.length === 0 || (this.state.selectedMonsterTypes.length > 0 && this.state.selectedMonsterTypes.includes(Monsters[monster].type)))
+                (this.state.selectedMonsterTypes.length === 0 || (this.state.selectedMonsterTypes.length > 0 && this.state.selectedMonsterTypes.includes(Monsters[monster].type))) &&
+                (this.state.searchString.length === 0 || (Monsters[monster].name.toLowerCase().includes( this.state.searchString.toLowerCase() )))
                 )
               {
               if (this.props.match.params.monster === monster) {
