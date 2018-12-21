@@ -1,6 +1,10 @@
 import React from 'react';
 import { Route, Link } from 'react-router-dom'
 import Home from './home'
+import GoogleLogin from 'react-google-login';
+import Cookies from 'universal-cookie';
+import axios from 'axios';
+
 import CharClassesComponent from './charClasses'
 import RacesComponent from './races'
 import SkillsComponent from './skills'
@@ -31,6 +35,9 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import LibraryBooks from '@material-ui/icons/LibraryBooks';
 import Settings from '@material-ui/icons/Settings';
+import Button from "@material-ui/core/Button";
+import Avatar from "@material-ui/core/Avatar";
+import Chip from "@material-ui/core/Chip";
 
 const drawerWidth = 300;
 
@@ -91,29 +98,90 @@ const styles = theme => ({
   },
 });
 
+const cookies = new Cookies();
+
 class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = { 
-        open: false,
-        collapseOpen: false,
-        characters: []
+          open: false,
+          collapseOpen: false,
+          characters: [],
+          tokenId: "",
+          userEmail: "",
+          userAvatar: "",
+          userName: "",
+          isSignedIn: false
         };
     }
 
+    componentDidMount() {
+      if (cookies.get('tokenId')) {  
+        axios.get("https://www.googleapis.com/oauth2/v3/tokeninfo?id_token="+ cookies.get('tokenId')).then( result => { 
+          if (result.status === 200) {
+            this.setState({
+              userEmail: result.data.email.replace(".", "").replace("@", "_"),
+              userAvatar: result.data.picture,
+              userName: result.data.name,
+              isSignedIn: true
+            })    
+          }
+          else {
+            this.logout();
+          }
+        });
+      }
+    };
+
+    componentDidUpdate() {}
+
     handleDrawerOpen = () => {
-    this.setState({ open: true });
+      this.setState({ open: true });
     };
 
     handleDrawerClose = () => {
-    this.setState({ open: false });
+      this.setState({ open: false });
     };
 
     handleCollapse = () => {
     this.setState((prevState) => 
-        ({ collapseOpen: !prevState.collapseOpen })
+      ({ collapseOpen: !prevState.collapseOpen })
     )};
-
+    
+    handleSuccess = (response) => {
+      cookies.set('tokenId', response.tokenId, { path: '/' }); 
+      this.setState({ 
+        tokenId: response.tokenId,
+        userEmail: response.profileObj.email.replace(".", "").replace("@", "_"),
+        userAvatar: response.profileObj.imageUrl,
+        userName: response.profileObj.name,
+        isSignedIn: true 
+      });
+    }
+    
+    handleFailure = (response) => {
+      console.log(response.error);
+    }
+    
+    logout = () => {
+      cookies.remove("tokenId");
+      const auth2 = window.gapi.auth2.getAuthInstance()
+      if (auth2 != null) {
+        auth2.signOut().then(
+          auth2.disconnect().then(
+            this.setState({ 
+              isSignedIn: false,
+              tokenId: "",
+              userEmail: "",
+              userName: "",
+              userAvatar: ""
+            })
+          )
+        )
+      }
+      
+    }
+    
     render() {
         const { classes, theme } = this.props;
         const { open } = this.state;
@@ -139,6 +207,33 @@ class App extends React.Component {
                 <Typography variant="h5" color="inherit" noWrap>
                   Character Storage
                 </Typography>
+                <div style={{position: "absolute", right: "1rem"}}>
+                {(this.state.isSignedIn) &&
+                <React.Fragment>
+                  <Chip
+                    avatar={<Avatar alt={this.state.userName} src={this.state.userAvatar} />}
+                    label={this.state.userName}
+                    variant="outlined"
+                  />
+                </React.Fragment>
+                }
+                {!(this.state.isSignedIn) &&
+                  <GoogleLogin 
+                    clientId="622525415090-jfrm3gbsve3r2hkg6djmusmqmsdr4u3k.apps.googleusercontent.com"
+                    onSuccess={this.handleSuccess}
+                    onFailure={this.handleFailure}
+                    render={renderProps => (
+                      <Button onClick={renderProps.onClick} color="default">Sign In</Button>
+                    )}
+                    isSignedIn={this.state.isSignedIn}
+                  />
+                }
+                {(this.state.isSignedIn) &&
+                  <React.Fragment>
+                    <Button onClick={this.logout} color="default">Sign Out</Button>
+                  </React.Fragment>
+                }
+                </div>
               </Toolbar>
             </AppBar>
             <Drawer
@@ -158,7 +253,7 @@ class App extends React.Component {
               <Divider />
               <List>
                 {this.state.characters.length === 0 &&
-                  <ListItem button>
+                  <ListItem button disabled>
                     <ListItemIcon><AddCircleIcon /></ListItemIcon>
                     <ListItemText primary="Create a Character" />
                   </ListItem>
@@ -197,7 +292,7 @@ class App extends React.Component {
                 </List>
               </Collapse>
               <Divider />
-              <ListItem button>
+              <ListItem button disabled>
                     <ListItemIcon>
                       <Settings />
                     </ListItemIcon>
