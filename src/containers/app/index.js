@@ -27,6 +27,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -72,11 +73,13 @@ const styles = theme => ({
   },
   drawerPaper: {
     width: drawerWidth,
+    color: "#fff"
   },
   drawerHeader: {
     display: 'flex',
     alignItems: 'center',
     padding: '0 8px',
+    color: '#fff',
     ...theme.mixins.toolbar,
     justifyContent: 'flex-end',
   },
@@ -283,7 +286,7 @@ class App extends React.Component {
               <Collapse in={this.state.collapseOpen} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
                   {["Races", "Classes", "Skills", "Spells", "Equipment", "Monsters"].map( (text, key) => (
-                      <Link style={{textDecoration: "none"}} to={"/"+ text.toLowerCase()} key={key}>
+                      <Link style={{textDecoration: "none"}} to={"/"+ text.toLowerCase()} key={key} onClick={this.handleDrawerClose}>
                         <ListItem button className={classes.nested}>
                             <ListItemText inset primary={text} />
                         </ListItem>
@@ -298,6 +301,15 @@ class App extends React.Component {
                     </ListItemIcon>
                     <ListItemText primary="Settings" />
               </ListItem>
+              <Divider />
+              <a href="http://www.patreon.com/characterstorage" target="_blank" style={{textDecoration: "none"}} onClick={this.handleDrawerClose}>
+                <ListItem button>
+                      <ListItemIcon>
+                        <AttachMoneyIcon />
+                      </ListItemIcon>
+                      <ListItemText primary="Support on Patreon" />
+                </ListItem>
+              </a>
               </List>
             </Drawer>
             <main

@@ -36,7 +36,7 @@
     "babel-plugin-transform-es2015-spread": "^6.22.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-react": "^6.24.1",
-    "@material-ui/core": "^3.6.2",
+    "@material-ui/core": "^3.7.0",
     "@material-ui/icons": "^3.0.1",
     "universal-cookie": "^3.0.7",
     "css-loader": "^1.0.1",
