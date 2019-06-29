@@ -50,8 +50,8 @@ module.exports = {
   },
   plugins: [ 
     htmlWebpackPlugin,
-    /*new CompressionPlugin({
+    new CompressionPlugin({
       deleteOriginalAssets: true
-    })*/
+    })
   ]
 };

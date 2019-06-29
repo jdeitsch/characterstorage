@@ -39,6 +39,18 @@ import Settings from '@material-ui/icons/Settings';
 import Button from "@material-ui/core/Button";
 import Avatar from "@material-ui/core/Avatar";
 import Chip from "@material-ui/core/Chip";
+import Hidden from "@material-ui/core/Hidden";
+
+/*const S3FS = require('s3fs');
+var options = {
+  region: 'us-west-2',
+};
+var fsImpl = new S3FS('charstorage.users', options);
+fsImpl.writeFile('message.txt', 'Hello Node').then(function() {
+  console.log('It\'s saved!');
+}, function(reason) {
+  throw reason;
+});*/
 
 const drawerWidth = 300;
 
@@ -127,7 +139,7 @@ class App extends React.Component {
               userAvatar: result.data.picture,
               userName: result.data.name,
               isSignedIn: true
-            })    
+            });
           }
           else {
             this.logout();
@@ -213,11 +225,13 @@ class App extends React.Component {
                 <div style={{position: "absolute", right: "1rem"}}>
                 {(this.state.isSignedIn) &&
                 <React.Fragment>
+                  <Hidden smDown>
                   <Chip
                     avatar={<Avatar alt={this.state.userName} src={this.state.userAvatar} />}
                     label={this.state.userName}
                     variant="outlined"
                   />
+                  </Hidden>
                 </React.Fragment>
                 }
                 {!(this.state.isSignedIn) &&
